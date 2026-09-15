@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Connected — BTCP QuickBooks Integration</title>
+<style>
+  :root{color-scheme:light dark}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+       line-height:1.6;max-width:40rem;margin:0 auto;padding:3rem 1.25rem;color:#1a1a1a;background:#fff}
+  @media (prefers-color-scheme:dark){
+    body{background:#131313;color:#e8e8e8}
+    .field{background:#1c1c1c;border-color:#333}
+    code{background:#222}
+    .note{border-color:#333}
+    a{color:#7ab8ff}
+  }
+  h1{font-size:1.5rem;margin-bottom:.25rem}
+  .sub{opacity:.7;margin-top:0}
+  .field{background:#f6f6f6;border:1px solid #e2e2e2;border-radius:.5rem;
+         padding:1rem 1.25rem;margin:1.25rem 0}
+  .label{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;
+         opacity:.65;margin-bottom:.4rem}
+  .value{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+         font-size:.95rem;word-break:break-all;line-height:1.5}
+  button{font:inherit;font-size:.85rem;padding:.45rem .9rem;margin-top:.75rem;
+         border:1px solid currentColor;background:transparent;color:inherit;
+         border-radius:.35rem;cursor:pointer}
+  button:hover{opacity:.7}
+  .note{border-left:3px solid #999;padding:.25rem 0 .25rem 1rem;margin:2rem 0;opacity:.85}
+  .err{color:#b3261e}
+  ol{padding-left:1.25rem} li{margin:.45rem 0}
+  footer{margin-top:3rem;font-size:.85rem;opacity:.65;border-top:1px solid #e2e2e2;padding-top:1.5rem}
+</style>
+</head>
+<body>
+
+<div id="ok" hidden>
+  <h1>Connected.</h1>
+  <p class="sub">Copy these two values into your terminal.</p>
+
+  <div class="field">
+    <div class="label">Authorization code</div>
+    <div class="value" id="code"></div>
+    <button onclick="copy('code',this)">Copy code</button>
+  </div>
+
+  <div class="field">
+    <div class="label">Realm ID (your company)</div>
+    <div class="value" id="realm"></div>
+    <button onclick="copy('realm',this)">Copy realm ID</button>
+  </div>
+
+  <div class="note">
+    <strong>The code expires in a few minutes.</strong> Paste it now. If it expires,
+    nothing is broken — just run the setup again and approve a second time.
+  </div>
+
+  <ol>
+    <li>Switch back to Terminal.</li>
+    <li>Paste the authorization code when it asks, press Return.</li>
+    <li>Paste the realm ID when it asks, press Return.</li>
+  </ol>
+</div>
+
+<div id="bad" hidden>
+  <h1 class="err">Not connected.</h1>
+  <p class="sub">Intuit did not return an authorization code.</p>
+  <div class="field"><div class="value" id="why"></div></div>
+  <p>Close this tab and run the setup again. If it keeps happening, the usual cause
+     is a redirect URI on the Intuit app that does not match the one the script
+     is using, character for character.</p>
+</div>
+
+<footer>
+  <strong>Brandenberger Tree Care Professionals</strong><br>
+  Internal QuickBooks integration &middot; <a href="./">about this app</a>
+</footer>
+
+<script>
+  var q = new URLSearchParams(location.search);
+  var code = q.get('code'), realm = q.get('realmId');
+  if (code) {
+    document.getElementById('code').textContent = code;
+    document.getElementById('realm').textContent = realm || '(not supplied)';
+    document.getElementById('ok').hidden = false;
+  } else {
+    document.getElementById('why').textContent =
+      q.get('error_description') || q.get('error') || 'No code and no error was returned.';
+    document.getElementById('bad').hidden = false;
+  }
+  function copy(id, btn) {
+    var text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(function () {
+      var was = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(function () { btn.textContent = was; }, 1500);
+    }, function () {
+      btn.textContent = 'Select it manually';
+    });
+  }
+</script>
+</body>
+</html>
